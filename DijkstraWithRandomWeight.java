@@ -6,11 +6,15 @@ import java.util.Scanner;
 public class DijkstraWithRandomWeight {
     public static void main(String[] args) throws Exception {
         Scanner sc = new Scanner(System.in);
+
         System.out.println("Enter the number of vertices");
         int V = sc.nextInt();
+
         HashMap<Integer, Integer>[] graph = new HashMap[V];
+
         System.out.println("Enter the number of edges");
         int E = sc.nextInt();
+
         System.out.println("Enter the beginning point then the end point and then the time needed to travel");
         while(E>0){
             int src = sc.nextInt()-1;
@@ -25,10 +29,17 @@ public class DijkstraWithRandomWeight {
         System.out.println("Enter the starting point and destination");
         int src = sc.nextInt()-1;
         int dest = sc.nextInt()-1;
+
+        //Map to retain the final path taken for each node as well as the time
         HashMap<Integer, Route> result = new HashMap<>();
+        //Array for maintaining the distance for a node.
         int[] distance = new int[V];
+
+        //Calling modified dijkstra algorithm
         getShortestPath(graph, result, src, distance);
+        
         System.out.println("Time needed to travel to destination: "+ result.get(dest).cost + "\nPath taken would be "+ result.get(dest).path);
+        
         System.out.println("All nodes shortest time as below");
         for(int node : result.keySet()){
             System.out.println((node+1)+": time: "+ result.get(node).cost + "\tPath: "+ result.get(node).path);
@@ -36,6 +47,7 @@ public class DijkstraWithRandomWeight {
     }
     private static void getShortestPath(HashMap<Integer, Integer>[] graph, HashMap<Integer, Route> result, int src, int[] distance) {
         PriorityQueue<Route> heap = new PriorityQueue<>((a,b)->(a.cost - b.cost));
+        //Adding all the vertices into heap.
         for(int i=0; i<graph.length; i++){
             if(i==src)
                 heap.add(new Route("", 0, src));
@@ -45,22 +57,30 @@ public class DijkstraWithRandomWeight {
             }
         }
         while(result.size()!=graph.length){
+            //retrieving the node with minimum time to reach.
             Route minRoute = heap.poll();
+
             if(result.containsKey(minRoute.node))
                 continue;
+
             minRoute.path += (minRoute.node+1);
             result.put(minRoute.node, minRoute);
             HashMap<Integer, Integer> current = graph[minRoute.node];
+
             if(current == null)
                 continue;
+            //Getting the neighbors and updating the time for each node.
             for(int adj : current.keySet()){
                 int expected = minRoute.cost + current.get(adj);
+                //Calling the function that will provide the new time after considering the weather.
                 int delayed = getDelay(minRoute.node, adj, expected);
                 int earlier = distance[adj];
+
                 if(earlier > delayed){
                     distance[adj] = delayed;
                     heap.add(new Route(minRoute.path, delayed, adj));
                 }
+                //Here we are updating the previous time with the new time after considering weather conditions
                 graph[minRoute.node].put(adj, delayed - minRoute.cost);
                 System.out.println("The distance between nodes "+(minRoute.node+1) + " and "+ (adj+1) + 
                 " has been changed and updated considering the weather from " + 
